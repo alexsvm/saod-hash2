@@ -13,37 +13,88 @@ HashIndexType Hash4(const string  &str) {
 }
 
 class Hash_Table {
-private:
-	int _size;
+public:
 	struct data {
 		string key;
-		string data;
+		string val;
 	};
 
-	data *table;
+	typedef  data* pdata;
+
+private:
+	int _size;
+	pdata *table;
 
 	int Hash(const string  &str) {
 		int i = 0;
 		for (const auto c : str)
 			i = i ^ c;
-		return i;
+		return i % _size;
 	};
+
+	int Next_Index() { // Возвращает следущий ключ
+
+	}
 
 public:
-	Hash_Table(int size) : _size(size), table(new data[size]) {
-		
-	};
 
+	Hash_Table(int size) : _size(size), table(new pdata[size]) {
+		for (int i = 0; i < _size; i++)
+			table[i] = nullptr;
+	};
+	
 	~Hash_Table() {
 		delete[] table;
 	};
 
-	data* const Get(const string &Key) {
+	pdata const Get(const string &Key) {
 		int _key = Hash(Key);
+		pdata _item = table[_key];
+		srand(_key);
+		while (true) {
+			if (_item != nullptr) {
+				if (Key == _item->key) {
+					return _item;
+				} else {
+					_key = rand() % _size; // Следующее значение индекса
+					_item = table[_key];
+				}
+			} else return nullptr;
+		}
+		string k = table[_key]->key;
+	};
 
+	int Get_Index(const string &Key) {
+		int _key = Hash(Key);
+		pdata _item = table[_key];
+		srand(_key);
+		while (true) {
+			if (_item != nullptr) {
+				if (Key == _item->key) {
+					return _key;
+				}
+				else {
+					_key = rand() % _size; // Следующее значение индекса
+					_item = table[_key];
+				}
+			}
+			else return _key;
+		}
+		string k = table[_key]->key;
 	};
 
 	void Set(const string &Key, const string &Value) {
+		int idx = Get_Index(Key);
+		if (table[idx] != nullptr) {
+			table[idx]->val = Value;
+		} else {
+			table[idx] = new data;
+			table[idx]->key = Key;
+			table[idx]->val = Value;
+		}
+	};
+
+	bool Del(const string &Key) {
 
 	};
 
@@ -61,6 +112,19 @@ int main()
 	cout << "s=" << s3 << ", hash=" << Hash4(s3) << endl;
 
 
+
+	Hash_Table ht(100);
+	ht.Set("asdf", "asdgfhdgsfjhadgsdhg");
+	ht.Set("qwert", "qwertyoipojlkdklfksjd");
+	ht.Set("zxcv", "zxcvnjhfkdjhfksjdfksjdf");
+
+	Hash_Table::pdata pd = ht.Get("asdf");
+	if (pd != nullptr) {
+		string s = pd->val;
+		cout << "Value found [" << pd->key << "]=" << pd->val << endl;
+	}
+	else
+		cout << "Value not found!" << endl;
 
 	// The end
 	cout << endl << "\n\nEnter x to exit...";
